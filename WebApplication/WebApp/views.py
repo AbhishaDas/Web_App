@@ -1,8 +1,9 @@
-from django.http import HttpResponse
+#view.py
 from django.shortcuts import redirect, render
-from django.contrib.auth.forms import AuthenticationForm
-
-from WebApplication.WebApp.forms import UserForm
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth.models import User
+from . forms import UserForm
+from WebApp.models import userinfo
 
 # Create your views here.
 def signup(request):
@@ -14,17 +15,30 @@ def signup(request):
     else:
         frm=UserForm()
         
-    return render(request,'signup.html',{frm:'frm'})
+    return render(request,'signup.html',{'frm':frm})
 
 def login(request):
-    if request.method == 'POST':
+    if request.POST:
         username = request.POST['username']
         password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+        
+        print("Username:", username)
+        print("Password:", password)
+        
+        user= authenticate(request,username=username,password=password)
         if user is not None:
-            login(request, user)
-            return redirect('home')  # Assuming 'home' is the name of the URL pattern for the home view
+            
+            print("User authenticated successfully.")
+            
+            auth_login(request, user)
+            return redirect('home')
         else:
-            return render(request, 'login.html', {'error': 'Invalid username or password'})
-    return render(request, 'login.html')
-    
+            
+            print("Authentication failed.")
+            
+            return render(request, 'login.html', {'error':'Invalid Username or Password'})
+    return render(request, 'login.html')   
+
+
+def home(request):
+    return render(request, 'home.html') 
