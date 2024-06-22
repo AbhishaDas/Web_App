@@ -1,9 +1,76 @@
-<!-- signup.html -->
-<h1>Signup</h1>
-<form action="" method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
+</head>
+<body>
+    
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="text-center mb-4">Signup</h1>
+                <form action="" method="POST" enctype="multipart/form-data" class="border p-4 shadow-sm bg-white">
+                    {% csrf_token %}
 
-    {{frm.as_p}}
-    <button type="submit">Signup</button>
-    <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
-</form>
+                    <div class="form-group row">
+                        <label for="{{ frm.firstname.id_for_label }}" class="col-sm-4 col-form-label">{{ frm.firstname.label_tag }}</label>
+                        <div class="col-sm-8">
+                            {{ frm.firstname }}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ frm.lastname.id_for_label }}" class="col-sm-4 col-form-label">{{ frm.lastname.label_tag }}</label>
+                        <div class="col-sm-8">
+                            {{ frm.lastname }}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ frm.email.id_for_label }}" class="col-sm-4 col-form-label">{{ frm.email.label_tag }}</label>
+                        <div class="col-sm-8">
+                            {{ frm.email }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <label for="{{ frm.username.id_for_label }}" class="col-sm-4 col-form-label">{{ frm.username.label_tag }}</label>
+                        <div class="col-sm-8">
+                            {{ frm.username }}
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="form-group row">
+                        <label for="{{ frm.password.id_for_label }}" class="col-sm-4 col-form-label">{{ frm.password.label_tag }}</label>
+                        <div class="col-sm-8">
+                            {{ frm.password }}
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">Signup</button>
+                    <p class="mt-3 text-center">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+    
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
