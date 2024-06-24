@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+        
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -13,7 +13,9 @@
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
+                {% block title %}
                 <h1 class="text-center mb-4">Login</h1>
+                {% endblock title %}
                 <form method="POST" action="" class="border p-4 shadow-sm bg-white">
                     {% csrf_token %}
                     {% if error %}

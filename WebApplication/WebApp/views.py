@@ -46,3 +46,24 @@ def logout(request):
 
 def home(request):
     return render(request, 'home.html')
+
+username = 'admin'
+password = 'admin123'
+
+
+def admin_login(request):
+    if request.POST:
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        if username == username and password == password:
+            return redirect('admin_home')
+        else:
+            return render(request, 'admin_login.html', {'error': 'Invalid username or password'})
+
+    return render(request, 'admin_login.html')
+
+def admin_home(request):
+     user_details = UserInfo.objects.all()
+     print(user_details)
+     return render(request,'admin_home.html',{'users' :user_details})
