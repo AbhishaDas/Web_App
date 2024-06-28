@@ -1,5 +1,7 @@
-from django.shortcuts import redirect, render
+#views.py
+from django.shortcuts import  redirect, render, get_object_or_404
 from django.contrib.auth.hashers import check_password
+from django.views.decorators.cache import cache_control, never_cache
 from .forms import UserForm
 from .models import UserInfo
 
@@ -13,6 +15,7 @@ def signup(request):
         frm = UserForm()
         
     return render(request, 'signup.html', {'frm': frm})
+
 
 def login_user(request):
     if request.POST:
@@ -40,12 +43,21 @@ def login_user(request):
 
 from django.shortcuts import redirect
 
+
 def logout(request):
     request.session.flush()  
     return redirect('login')
 
+
 def home(request):
-    return render(request, 'home.html')
+    user_id = request.session.get('user_id')
+    if user_id:
+        user = UserInfo.objects.get(pk=user_id)
+        username = user.username
+    else:
+        username = 'Guest'
+    return render(request, 'home.html', {'username': username})
+
 
 username = 'admin'
 password = 'admin123'
@@ -64,6 +76,32 @@ def admin_login(request):
     return render(request, 'admin_login.html')
 
 def admin_home(request):
-     user_details = UserInfo.objects.all()
-     print(user_details)
-     return render(request,'admin_home.html',{'users' :user_details})
+    query = request.GET.get('q')
+    if query:
+        user_details = UserInfo.objects.filter(
+            firstname__icontains=query) | UserInfo.objects.filter(
+            lastname__icontains=query) | UserInfo.objects.filter(
+            email__icontains=query) | UserInfo.objects.filter(
+            username__icontains=query)
+    else:
+        user_details = UserInfo.objects.all()
+        
+    return render(request, 'admin_home.html', {'users': user_details})
+
+ 
+ 
+def manage_user(request, user_id):
+    user = get_object_or_404(UserInfo, pk=user_id)
+    if request.POST:
+        if 'save' in request.POST:
+            frm = UserForm(request.POST, instance=user)
+            if frm.is_valid():
+                frm.save()
+                return redirect('admin_home')
+        elif 'delete' in request.POST:
+            user.delete()
+            return redirect('admin_home')
+    else:
+        frm = UserForm(instance=user)
+    
+    return render(request, 'manage_user.html', {'frm': frm, 'user': user})

@@ -7,3 +7,4 @@ class UserForm(ModelForm):
     class Meta:
         model = UserInfo
         fields = '__all__'
+        exclude = ['username', 'password']
