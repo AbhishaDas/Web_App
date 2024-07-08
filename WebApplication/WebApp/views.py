@@ -47,7 +47,6 @@ def logout(request):
     return redirect('login')
 
 
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def home(request):
     user_id = request.session.get('user_id')
     if user_id:
