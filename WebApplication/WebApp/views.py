@@ -1,8 +1,11 @@
 from django.shortcuts import  redirect, render, get_object_or_404
 from django.contrib.auth.hashers import check_password
-from django.views.decorators.cache import cache_control
 from .forms import UserForm, EditUserForm
 from .models import UserInfo
+from django.views.generic import TemplateView
+from django.views import View
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_control
 
 def signup(request):
     if request.POST:
@@ -15,9 +18,12 @@ def signup(request):
         
     return render(request, 'signup.html', {'frm': frm})
 
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
-def login_user(request):
-    if request.POST:
+
+class LoginUserView(View):
+    def get(self, request):
+        return render(request, 'login.html')
+
+    def post(self, request):
         username = request.POST['username']
         password = request.POST['password']
         
@@ -27,18 +33,12 @@ def login_user(request):
         try:
             user = UserInfo.objects.get(username=username)
             if check_password(password, user.password):
-                print("User authenticated successfully.")
-             
                 request.session['user_id'] = user.pk
                 return redirect('home')
             else:
-                print("Authentication failed.")
                 return render(request, 'login.html', {'error': 'Invalid Username or Password'})
         except UserInfo.DoesNotExist:
-            print("Authentication failed.")
             return render(request, 'login.html', {'error': 'Invalid Username or Password'})
-    
-    return render(request, 'login.html')   
 
 
 
@@ -46,15 +46,19 @@ def logout(request):
     request.session.flush()  
     return redirect('login')
 
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=True), name='dispatch')
+class HomeView(TemplateView):
+    template_name = 'home.html'
 
-def home(request):
-    user_id = request.session.get('user_id')
-    if user_id:
-        user = UserInfo.objects.get(pk=user_id)
-        username = user.username
-    else:
-        username = 'Guest'
-    return render(request, 'home.html', {'username': username})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_id = self.request.session.get('user_id')
+        if user_id:
+            user = UserInfo.objects.get(pk=user_id)
+            context['username'] = user.username
+        else:
+            context['username'] = 'Guest'
+        return context
 
 
 username = 'admin'
@@ -73,6 +77,8 @@ def admin_login(request):
 
     return render(request, 'admin_login.html')
 
+
+
 def admin_home(request):
     query = request.GET.get('q')
     if query:
@@ -87,7 +93,7 @@ def admin_home(request):
     return render(request, 'admin_home.html', {'users': user_details})
 
  
- 
+
 def manage_user(request, user_id):
     user = get_object_or_404(UserInfo, pk=user_id)
     if request.POST:
