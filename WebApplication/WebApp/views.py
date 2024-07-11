@@ -2,6 +2,8 @@ from django.shortcuts import  redirect, render, get_object_or_404
 from django.contrib.auth.hashers import check_password
 from .forms import UserForm, EditUserForm
 from .models import UserInfo
+from django.contrib.auth.decorators import login_required
+
 
 
 def signup(request):
@@ -45,7 +47,7 @@ def logout(request):
     request.session.flush()  
     return redirect('login')
 
-
+@login_required(login_url='login')
 def home(request):
     user_id = request.session.get('user_id')
     if user_id:
