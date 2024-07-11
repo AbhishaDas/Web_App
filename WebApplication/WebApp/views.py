@@ -37,10 +37,12 @@ def login_user(request):
                 return redirect('home')
             
             else:
-                return render(request, 'login.html', {'error': 'Invalid Username or Password'})
+                error_message = 'Invalid Username or Password'
             
         except UserInfo.DoesNotExist:
-            return render(request, 'login.html', {'error': 'Invalid Username or Password'})
+                error_message = 'Invalid Username or Password'
+                
+        return render(request, 'login.html',  {'error': error_message})
     
     return render(request, 'login.html')   
 
@@ -54,15 +56,21 @@ def logout(request):
 def home(request):
     user_id = request.session.get('user_id')
     if user_id:
-        user = UserInfo.objects.get(pk=user_id)
-        username = user.username
+        try:
+            user = UserInfo.objects.get(pk=user_id)
+            username = user.username
+        except UserInfo.DoesNotExist:
+            # Handle the case where the user_id is in the session but the user no longer exists
+            request.session.flush()
+            username = 'Guest'
+        
     else:
         username = 'Guest'
     return render(request, 'home.html', {'username': username})
 
 
-username = 'admin'
-password = 'admin123'
+admin_username = 'admin'
+admin_password = 'admin123'
 
 
 def admin_login(request):
@@ -70,7 +78,7 @@ def admin_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         
-        if username == username and password == password:
+        if username == admin_username and password == admin_password:
             return redirect('admin_home')
         else:
             return render(request, 'admin_login.html', {'error': 'Invalid username or password'})
