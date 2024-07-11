@@ -3,8 +3,11 @@ from django.contrib.auth.hashers import check_password
 from .forms import UserForm, EditUserForm
 from .models import UserInfo
 from django.contrib.auth.decorators import login_required
+from . middleware import NoCacheMiddleware
+from django.utils.decorators import decorator_from_middleware
 
 
+cache_control_no_cache = decorator_from_middleware(NoCacheMiddleware)
 
 def signup(request):
     if request.POST:
@@ -17,7 +20,7 @@ def signup(request):
         
     return render(request, 'signup.html', {'frm': frm})
 
-
+@cache_control_no_cache
 def login_user(request):
     if request.POST:
         username = request.POST['username']
@@ -47,7 +50,7 @@ def logout(request):
     request.session.flush()  
     return redirect('login')
 
-@login_required(login_url='login')
+@cache_control_no_cache
 def home(request):
     user_id = request.session.get('user_id')
     if user_id:
@@ -75,7 +78,7 @@ def admin_login(request):
     return render(request, 'admin_login.html')
 
 
-
+@cache_control_no_cache
 def admin_home(request):
     query = request.GET.get('q')
     if query:
