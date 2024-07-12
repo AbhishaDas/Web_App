@@ -1,15 +1,17 @@
-from django.shortcuts import  redirect, render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.hashers import check_password
 from .forms import UserForm, EditUserForm
 from .models import UserInfo
-from django.contrib.auth.decorators import login_required
-from . middleware import NoCacheMiddleware
+from .middleware import NoCacheMiddleware
 from django.utils.decorators import decorator_from_middleware
 
 
 cache_control_no_cache = decorator_from_middleware(NoCacheMiddleware)
 
+@cache_control_no_cache
 def signup(request):
+    if 'user_id' in request.session:
+        return redirect('home')
     if request.POST:
         frm = UserForm(request.POST)
         if frm.is_valid():
@@ -22,56 +24,42 @@ def signup(request):
 
 @cache_control_no_cache
 def login_user(request):
+    if 'user_id' in request.session:
+        return redirect('home')
     if request.POST:
         username = request.POST['username']
         password = request.POST['password']
-        
-        print("Username:", username)
-        print("Password:", password)
-        
         try:
             user = UserInfo.objects.get(username=username)
             if check_password(password, user.password):
-             
                 request.session['user_id'] = user.pk
                 return redirect('home')
-            
             else:
                 error_message = 'Invalid Username or Password'
-            
         except UserInfo.DoesNotExist:
                 error_message = 'Invalid Username or Password'
-                
         return render(request, 'login.html',  {'error': error_message})
-    
     return render(request, 'login.html')   
 
-
-
 def logout(request):
-    request.session.flush()  
+    if 'user_id' in request.session:
+        request.session.flush()  
     return redirect('login')
 
 @cache_control_no_cache
 def home(request):
+    if 'user_id' not in request.session:
+        return redirect('login')
     user_id = request.session.get('user_id')
+    username = None
     if user_id:
-        try:
-            user = UserInfo.objects.get(pk=user_id)
-            username = user.username
-        except UserInfo.DoesNotExist:
-            # Handle the case where the user_id is in the session but the user no longer exists
-            request.session.flush()
-            username = 'Guest'
-        
-    else:
-        username = 'Guest'
+        user = UserInfo.objects.get(pk=user_id)
+        username = user.username
+         
     return render(request, 'home.html', {'username': username})
-
 
 admin_username = 'admin'
 admin_password = 'admin123'
-
 
 def admin_login(request):
     if request.POST:
@@ -84,7 +72,6 @@ def admin_login(request):
             return render(request, 'admin_login.html', {'error': 'Invalid username or password'})
 
     return render(request, 'admin_login.html')
-
 
 @cache_control_no_cache
 def admin_home(request):
@@ -99,8 +86,6 @@ def admin_home(request):
         user_details = UserInfo.objects.all()
         
     return render(request, 'admin_home.html', {'users': user_details})
-
- 
 
 def manage_user(request, user_id):
     user = get_object_or_404(UserInfo, pk=user_id)
